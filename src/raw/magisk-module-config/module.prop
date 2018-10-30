@@ -1,0 +1,7 @@
+id=overture_magisk
+name=Overture
+version=v1
+versionCode=1
+author=shawn1m (module by Kr328)
+description=A DNS server/forwarder/dispatcher written in Go
+minMagisk=17000
