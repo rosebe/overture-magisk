@@ -10,12 +10,15 @@ MODDIR=${0%/*}
 
 $MODDIR/executable/daemon $MODDIR/executable/overture -c /etc/overture/overture.conf
 
-if [ -n "$LOCALHOST_ALIAS" ];then
-iptables -t nat -A OUTPUT     --destination $LOCALHOST_ALIAS -j DNAT --to-destination 127.0.0.1
-iptables -t nat -A PREROUTING --destination $LOCALHOST_ALIAS -j DNAT --to-destination 127.0.0.1
+if [ -n "$LOCALDNS_ALIAS" ];then
+	iptables -t nat -A OUTPUT -p tcp --destination $LOCALDNS_ALIAS --dport 53 -j REDIRECT --to-ports 3753
+	iptables -t nat -A OUTPUT -p udp --destination $LOCALDNS_ALIAS --dport 53 -j REDIRECT --to-ports 3753
+	iptables -t nat -A PREROUTING -p tcp --destination $LOCALDNS_ALIAS --dport 53 -j REDIRECT --to-ports 3753
+	iptables -t nat -A PREROUTING -p udp --destination $LOCALDNS_ALIAS --dport 53 -j REDIRECT --to-ports 3753
+	
+	if [ "$RUN_DNS_KEEPER" = "true" ];then
+		$MODDIR/executable/daemon $MODDIR/executable/dns_keeper $LOCALDNS_ALIAS
+	fi
 fi
 
-if [ "$RUN_DNS_KEEPER" = "true" ];then
-$MODDIR/executable/daemon $MODDIR/executable/dns_keeper 127.0.0.1
-fi
 
